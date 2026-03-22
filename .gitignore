@@ -1,0 +1,10 @@
+# flake
+.envrc
+.direnv/
+
+# binaries
+/bin
+
+# zig
+zig-out
+.zig-cache
