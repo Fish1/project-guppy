@@ -281,3 +281,27 @@ pub fn m_cycle_0x09(_: *OPCode, cycle: usize, bus: *components.bus.Bus) usize {
         },
     }
 }
+
+pub fn m_cycle_0x0a(_: *OPCode, cycle: usize, bus: *components.bus.Bus) usize {
+    switch (cycle) {
+        0 => {
+            bus.special_registers.set_z(
+                bus.memory.data[
+                    bus.cpu.registers.get_bc()
+                ],
+            );
+            return 1;
+        },
+        1 => {
+            bus.cpu.fetch(bus.memory);
+            bus.cpu.registers.inc_pc();
+            bus.cpu.registers.set_a(
+                bus.special_registers.get_z(),
+            );
+            return 0;
+        },
+        else => {
+            return 0;
+        },
+    }
+}
