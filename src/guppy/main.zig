@@ -38,9 +38,9 @@ pub fn main() !void {
 
 test "cpu sst" {
     std.testing.log_level = .debug;
-    for (0..10) |index| {
+    for (0..11) |index| {
         var filename_buffer: [23]u8 = undefined;
-        const filename = try std.fmt.bufPrint(&filename_buffer, "./tests/sm83/v1/{d:0>2}.json", .{index});
+        const filename = try std.fmt.bufPrint(&filename_buffer, "./tests/sm83/v1/{x:0>2}.json", .{index});
 
         const data = try std.Io.Dir.cwd().readFileAlloc(std.testing.io, filename, std.testing.allocator, std.Io.Limit.limited(1000000));
         defer std.testing.allocator.free(data);
