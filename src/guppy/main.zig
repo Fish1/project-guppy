@@ -38,7 +38,7 @@ pub fn main() !void {
 
 test "cpu sst" {
     std.testing.log_level = .debug;
-    for (0..11) |index| {
+    for (0..12) |index| {
         var filename_buffer: [23]u8 = undefined;
         const filename = try std.fmt.bufPrint(&filename_buffer, "./tests/sm83/v1/{x:0>2}.json", .{index});
 

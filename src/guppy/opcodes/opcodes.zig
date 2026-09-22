@@ -305,3 +305,14 @@ pub fn m_cycle_0x0a(_: *OPCode, cycle: usize, bus: *components.bus.Bus) usize {
         },
     }
 }
+
+pub fn m_cycle_0x0b(_: *OPCode, cycle: usize, _: *components.bus.Bus) usize {
+    switch (cycle) {
+        0 => {
+            return 0;
+        },
+        else => {
+            return 0;
+        },
+    }
+}

@@ -99,6 +99,9 @@ pub const CPU = struct {
             0x0a => .init(.{
                 .m_cycle_function = cds.m_cycle_0x0a,
             }),
+            0x0b => .init(.{
+                .m_cycle_function = cds.m_cycle_0x0b,
+            }),
             else => blk: {
                 std.log.err("failed to parse code: 0x{x:0>2}", .{code});
                 break :blk .init(.{
