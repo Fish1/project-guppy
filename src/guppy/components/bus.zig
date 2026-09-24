@@ -25,11 +25,11 @@ pub const Bus = struct {
         self.cpu.execute(self);
     }
 
-    pub fn load_boot(self: *@This(), filename: []const u8) !void {
-        _ = try std.fs.cwd().readFile(filename, self.memory.get_rom_bank_00().*);
+    pub fn load_boot(self: *@This(), filename: []const u8, io: std.Io) !void {
+        _ = try std.Io.Dir.cwd().readFile(io, filename, self.memory.get_rom_bank_00().*);
     }
 
-    pub fn load_rom(self: *@This(), filename: []const u8) !void {
-        _ = try std.fs.cwd().readFile(filename, self.memory.get_rom_bank_00().*);
+    pub fn load_rom(self: *@This(), filename: []const u8, io: std.Io) !void {
+        _ = try std.Io.Dir.cwd().readFile(io, filename, self.memory.get_rom_bank_00().*);
     }
 };
