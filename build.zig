@@ -26,8 +26,20 @@ pub fn build(b: *std.Build) void {
         run_cmd.addArgs(args);
     }
 
+    const test_mod_guppy = b.createModule(.{
+        .root_source_file = b.path("src/tests/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    test_mod_guppy.addImport("guppy", mod_guppy);
+
+    const test_exe = b.addExecutable(.{
+        .name = "guppy tests",
+        .root_module = test_mod_guppy,
+    });
+
     const tests = b.addTest(.{
-        .root_module = exe.root_module,
+        .root_module = test_exe.root_module,
     });
 
     const run_tests = b.addRunArtifact(tests);
