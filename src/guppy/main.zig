@@ -5,11 +5,11 @@ const sst = @import("single-step-tests.zig");
 pub fn main(init: std.process.Init) !void {
     std.log.info("Project Guppy!", .{});
 
-    var memory = components.memory.Memory.init();
-    var cpu = components.cpu.CPU.init();
-    var special_registers = components.special_registers.SpecialRegisters.init();
+    var memory = components.memory.init();
+    var cpu = components.cpu.init();
+    var special_registers = components.special_registers.init();
 
-    var bus = components.bus.Bus.init(.{
+    var bus = components.bus.init(.{
         .cpu = &cpu,
         .memory = &memory,
         .special_registers = &special_registers,
@@ -58,12 +58,12 @@ test "cpu sst" {
             // std.log.debug("init: {any}", .{t.initial});
             // std.log.debug("finl: {any}", .{t.final});
 
-            var memory = components.memory.Memory.init_test(t.initial);
-            var cpu = components.cpu.CPU.init_test(t.initial);
-            var special_registers = components.special_registers.SpecialRegisters.init();
+            var memory = components.memory.init_test(t.initial);
+            var cpu = components.cpu.init_test(t.initial);
+            var special_registers = components.special_registers.init();
             cpu.fetch(&memory);
             cpu.registers.inc_pc();
-            var bus = components.bus.Bus.init(.{
+            var bus = components.bus.init(.{
                 .cpu = &cpu,
                 .memory = &memory,
                 .special_registers = &special_registers,
