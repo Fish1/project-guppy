@@ -1,8 +1,10 @@
 const std = @import("std");
-const sst = @import("guppy").sst;
-const components = @import("guppy").components;
+const guppy = @import("guppy");
 
 test "cpu sst" {
+    const sst = guppy.sst;
+    const components = guppy.components;
+
     std.testing.log_level = .debug;
     for (0..11) |index| {
         var filename_buffer: [23]u8 = undefined;
