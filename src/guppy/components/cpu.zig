@@ -4,6 +4,7 @@ const sst = @import("../single-step-tests.zig");
 
 const Memory = @import("memory.zig");
 const Registers = @import("registers.zig");
+const OPCodes = @import("../opcodes/opcodes.zig");
 const OPCode = @import("../opcodes/opcodes.zig").OPCode;
 
 const components = @import("./components.zig");
@@ -18,9 +19,7 @@ const CPU = @This();
 
 registers: Registers = .init(),
 
-opcode: OPCode = .init(.{
-    .m_cycle_function = cds.m_cycle_0x00,
-}),
+cycle_function: OPCodes.CycleFunction = undefined,
 
 ir: u8 = 0,
 m_cycle: usize = 0,
@@ -66,45 +65,21 @@ pub fn fetch(self: *@This(), memory: *Memory) void {
     const pc = self.registers.get_pc();
     const code = memory.data[pc];
 
-    self.opcode = switch (code) {
-        0x00 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x00,
-        }),
-        0x01 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x01,
-        }),
-        0x02 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x02,
-        }),
-        0x03 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x03,
-        }),
-        0x04 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x04,
-        }),
-        0x05 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x05,
-        }),
-        0x06 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x06,
-        }),
-        0x07 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x07,
-        }),
-        0x08 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x08,
-        }),
-        0x09 => .init(.{
-            .m_cycle_function = cds.m_cycle_0x09,
-        }),
-        0x0a => .init(.{
-            .m_cycle_function = cds.m_cycle_0x0a,
-        }),
+    self.cycle_function = switch (code) {
+        0x00 => cds.m_cycle_0x00,
+        0x01 => cds.m_cycle_0x01,
+        0x02 => cds.m_cycle_0x02,
+        0x03 => cds.m_cycle_0x03,
+        0x04 => cds.m_cycle_0x04,
+        0x05 => cds.m_cycle_0x05,
+        0x06 => cds.m_cycle_0x06,
+        0x07 => cds.m_cycle_0x07,
+        0x08 => cds.m_cycle_0x08,
+        0x09 => cds.m_cycle_0x09,
+        0x0a => cds.m_cycle_0x0a,
         else => blk: {
             std.log.err("failed to parse code: 0x{x:0>2}", .{code});
-            break :blk .init(.{
-                .m_cycle_function = cds.m_cycle_0x00,
-            });
+            break :blk cds.m_cycle_0x00;
         },
     };
     self.m_cycle = 0;
@@ -112,5 +87,5 @@ pub fn fetch(self: *@This(), memory: *Memory) void {
 }
 
 pub fn execute(self: *@This(), bus: *components.bus) void {
-    self.m_cycle = self.opcode.m_cycle_function(&self.opcode, self.m_cycle, bus);
+    self.m_cycle = self.cycle_function(self.m_cycle, bus);
 }

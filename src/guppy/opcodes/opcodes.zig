@@ -1,46 +1,33 @@
 const std = @import("std");
 const components = @import("../components/components.zig");
-const CycleFunction = *const fn (self: *OPCode, cycle: usize, bus: *components.bus) usize;
+pub const CycleFunction = *const fn (cycle: usize, bus: *components.bus) usize;
 
-pub const OPCodeOptions = struct {
-    m_cycle_function: CycleFunction,
-};
-
-pub const OPCode = struct {
-    m_cycle_function: CycleFunction,
-
-    a8: u8 = undefined,
-    b8: u8 = undefined,
-    c8: u8 = undefined,
-    a16: u16 = undefined,
-
-    pub fn init(options: OPCodeOptions) @This() {
-        return .{
-            .m_cycle_function = options.m_cycle_function,
-        };
-    }
-};
-
-pub fn m_cycle_0x00(_: *OPCode, _: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x00(_: usize, bus: *components.bus) usize {
     bus.cpu.fetch(bus.memory);
     bus.cpu.registers.inc_pc();
     return 0;
 }
 
-pub fn m_cycle_0x01(self: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x01(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
-            self.a8 = bus.memory.data[bus.cpu.registers.get_pc()];
+            bus.special_registers.set_z(
+                bus.memory.data[bus.cpu.registers.get_pc()],
+            );
             bus.cpu.registers.inc_pc();
             return 1;
         },
         1 => {
-            self.b8 = bus.memory.data[bus.cpu.registers.get_pc()];
+            bus.special_registers.set_w(
+                bus.memory.data[bus.cpu.registers.get_pc()],
+            );
             bus.cpu.registers.inc_pc();
             return 2;
         },
         2 => {
-            const data: [2]u8 = .{ self.a8, self.b8 };
+            const a = bus.special_registers.get_z();
+            const b = bus.special_registers.get_w();
+            const data: [2]u8 = .{ a, b };
             bus.cpu.registers.set_bc(
                 std.mem.readInt(u16, &data, .little),
             );
@@ -55,7 +42,7 @@ pub fn m_cycle_0x01(self: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x02(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x02(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const data = bus.cpu.registers.get_a();
@@ -73,7 +60,7 @@ pub fn m_cycle_0x02(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x03(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x03(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             bus.cpu.registers.set_bc(
@@ -92,7 +79,7 @@ pub fn m_cycle_0x03(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x04(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x04(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const b = bus.cpu.registers.get_b();
@@ -120,7 +107,7 @@ pub fn m_cycle_0x04(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x05(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x05(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const b = bus.cpu.registers.get_b();
@@ -148,7 +135,7 @@ pub fn m_cycle_0x05(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x06(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x06(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const n = bus.memory.data[bus.cpu.registers.get_pc()];
@@ -167,7 +154,7 @@ pub fn m_cycle_0x06(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x07(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x07(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const b7 = bus.cpu.registers.get_a() & 0b10000000;
@@ -187,7 +174,7 @@ pub fn m_cycle_0x07(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x08(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x08(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             bus.special_registers.set_z(
@@ -234,7 +221,7 @@ pub fn m_cycle_0x08(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x09(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x09(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             const l = bus.cpu.registers.get_l();
@@ -282,7 +269,7 @@ pub fn m_cycle_0x09(_: *OPCode, cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x0a(_: *OPCode, cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x0a(cycle: usize, bus: *components.bus) usize {
     switch (cycle) {
         0 => {
             bus.special_registers.set_z(
