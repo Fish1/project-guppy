@@ -1,14 +1,15 @@
 const std = @import("std");
+const Registers = @import("../components/registers.zig");
 const components = @import("../components/components.zig");
-pub const CycleFunction = *const fn (cycle: usize, bus: *components.bus) usize;
+pub const CycleFunction = *const fn (opcode: u8, cycle: u8, bus: *components.bus) u8;
 
-pub fn m_cycle_0x00(_: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x00(_: u8, _: u8, bus: *components.bus) u8 {
     bus.cpu.fetch(bus.memory);
     bus.cpu.registers.inc_pc();
     return 0;
 }
 
-pub fn m_cycle_0x01(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x01(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             bus.special_registers.set_z(
@@ -42,7 +43,7 @@ pub fn m_cycle_0x01(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x02(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x02(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             const data = bus.cpu.registers.get_a();
@@ -60,7 +61,7 @@ pub fn m_cycle_0x02(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x03(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x03(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             bus.cpu.registers.set_bc(
@@ -79,10 +80,45 @@ pub fn m_cycle_0x03(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x04(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_increment_u8(opcode: u8, cycle: u8, bus: *components.bus) u8 {
+    var get: Registers.GetR8 = undefined;
+    var set: Registers.SetR8 = undefined;
+    switch (opcode) {
+        0x04 => {
+            get = Registers.get_b;
+            set = Registers.set_b;
+        },
+        0x14 => {
+            get = Registers.get_d;
+            set = Registers.set_d;
+        },
+        0x24 => {
+            get = Registers.get_h;
+            set = Registers.set_h;
+        },
+        0x0c => {
+            get = Registers.get_c;
+            set = Registers.set_c;
+        },
+        0x1c => {
+            get = Registers.get_e;
+            set = Registers.set_e;
+        },
+        0x2c => {
+            get = Registers.get_l;
+            set = Registers.set_l;
+        },
+        0x3c => {
+            get = Registers.get_a;
+            set = Registers.set_a;
+        },
+        else => {
+            unreachable;
+        },
+    }
     switch (cycle) {
         0 => {
-            const b = bus.cpu.registers.get_b();
+            const b = get(bus.cpu.registers);
 
             const result = @addWithOverflow(b, 1);
             const zero_flag = result[0] == 0;
@@ -92,11 +128,8 @@ pub fn m_cycle_0x04(cycle: usize, bus: *components.bus) usize {
             bus.cpu.registers.set_flag_z(zero_flag);
             bus.cpu.registers.set_flag_n(negative_flag);
             bus.cpu.registers.set_flag_h(half_carry_flag);
-            bus.cpu.registers.set_b(result[0]);
+            set(&bus.cpu.registers, result[0]);
 
-            return 1;
-        },
-        1 => {
             bus.cpu.fetch(bus.memory);
             bus.cpu.registers.inc_pc();
             return 0;
@@ -107,7 +140,7 @@ pub fn m_cycle_0x04(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x05(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x05(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             const b = bus.cpu.registers.get_b();
@@ -135,7 +168,7 @@ pub fn m_cycle_0x05(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x06(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x06(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             const n = bus.memory.data[bus.cpu.registers.get_pc()];
@@ -154,7 +187,7 @@ pub fn m_cycle_0x06(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x07(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x07(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             const b7 = bus.cpu.registers.get_a() & 0b10000000;
@@ -174,7 +207,7 @@ pub fn m_cycle_0x07(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x08(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x08(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             bus.special_registers.set_z(
@@ -221,7 +254,7 @@ pub fn m_cycle_0x08(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x09(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x09(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             const l = bus.cpu.registers.get_l();
@@ -269,7 +302,7 @@ pub fn m_cycle_0x09(cycle: usize, bus: *components.bus) usize {
     }
 }
 
-pub fn m_cycle_0x0a(cycle: usize, bus: *components.bus) usize {
+pub fn m_cycle_0x0a(_: u8, cycle: u8, bus: *components.bus) u8 {
     switch (cycle) {
         0 => {
             bus.special_registers.set_z(
@@ -285,6 +318,25 @@ pub fn m_cycle_0x0a(cycle: usize, bus: *components.bus) usize {
             bus.cpu.registers.set_a(
                 bus.special_registers.get_z(),
             );
+            return 0;
+        },
+        else => {
+            return 0;
+        },
+    }
+}
+
+pub fn m_cycle_0x0b(_: u8, cycle: u8, bus: *components.bus) u8 {
+    switch (cycle) {
+        0 => {
+            bus.cpu.registers.set_bc(
+                bus.cpu.registers.get_bc() - 1,
+            );
+            return 1;
+        },
+        1 => {
+            bus.cpu.fetch(bus.memory);
+            bus.cpu.registers.inc_pc();
             return 0;
         },
         else => {

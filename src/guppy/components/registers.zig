@@ -1,5 +1,10 @@
 const std = @import("std");
 
+pub const GetR8 = *const fn (self: Registers) u8;
+pub const SetR8 = *const fn (self: *Registers, value: u8) void;
+pub const GetR16 = *const fn (self: Registers) u16;
+pub const SetR16 = *const fn (self: *Registers, value: u16) void;
+
 const Registers = @This();
 
 data: [12]u8 = std.mem.zeroes([12]u8),

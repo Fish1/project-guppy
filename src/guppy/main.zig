@@ -16,9 +16,9 @@ pub fn main(init: std.process.Init) !void {
     });
 
     // try bus.load_rom("./bin/01-special.bin");
-    try bus.load_rom("./bin/tetris.bin", init.io);
-    try bus.load_boot("./bin/boot.bin", init.io);
-    memory.print_rom_info();
+    // try bus.load_rom("./bin/tetris.bin", init.io);
+    // try bus.load_boot("./bin/boot.bin", init.io);
+    // memory.print_rom_info();
 
     const ticks_per_second = 100000;
     const tick_time = @divFloor(std.time.ns_per_min, ticks_per_second);

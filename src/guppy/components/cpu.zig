@@ -22,7 +22,8 @@ registers: Registers = .init(),
 cycle_function: OPCodes.CycleFunction = undefined,
 
 ir: u8 = 0,
-m_cycle: usize = 0,
+m_cycle: u8 = 0,
+opcode: u8 = 0,
 opcode_count: usize = 0,
 
 pub fn init() @This() {
@@ -63,22 +64,29 @@ pub fn validate_test(self: @This(), final: sst.Final) bool {
 
 pub fn fetch(self: *@This(), memory: *Memory) void {
     const pc = self.registers.get_pc();
-    const code = memory.data[pc];
+    self.opcode = memory.data[pc];
 
-    self.cycle_function = switch (code) {
+    self.cycle_function = switch (self.opcode) {
         0x00 => cds.m_cycle_0x00,
         0x01 => cds.m_cycle_0x01,
         0x02 => cds.m_cycle_0x02,
         0x03 => cds.m_cycle_0x03,
-        0x04 => cds.m_cycle_0x04,
+        0x04 => cds.m_cycle_increment_u8,
+        0x14 => cds.m_cycle_increment_u8,
+        0x24 => cds.m_cycle_increment_u8,
         0x05 => cds.m_cycle_0x05,
         0x06 => cds.m_cycle_0x06,
         0x07 => cds.m_cycle_0x07,
         0x08 => cds.m_cycle_0x08,
         0x09 => cds.m_cycle_0x09,
         0x0a => cds.m_cycle_0x0a,
+        0x0b => cds.m_cycle_0x0b,
+        0x0c => cds.m_cycle_increment_u8,
+        0x1c => cds.m_cycle_increment_u8,
+        0x2c => cds.m_cycle_increment_u8,
+        0x3c => cds.m_cycle_increment_u8,
         else => blk: {
-            std.log.err("failed to parse code: 0x{x:0>2}", .{code});
+            std.log.err("failed to parse code: 0x{x:0>2}", .{self.opcode});
             break :blk cds.m_cycle_0x00;
         },
     };
@@ -87,5 +95,5 @@ pub fn fetch(self: *@This(), memory: *Memory) void {
 }
 
 pub fn execute(self: *@This(), bus: *components.bus) void {
-    self.m_cycle = self.cycle_function(self.m_cycle, bus);
+    self.m_cycle = self.cycle_function(self.opcode, self.m_cycle, bus);
 }
